@@ -13,6 +13,7 @@ private:
   void CreateUser();
   void CreateAccount();
   void LinkAccount();
+  void ShowUsers();
 
 public:
   Administrator(std::string name, std::string password, Bank *bank);

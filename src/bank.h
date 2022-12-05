@@ -14,4 +14,6 @@ private:
 public:
   Bank(std::string);
   void Login();
+  void AddUser(User* user) {users.push_back(user);}
+  std::vector<User*> GetUsers(){return users;};
 };

@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include "administrator.h"
 #include "bank.h"
