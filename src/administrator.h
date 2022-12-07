@@ -16,6 +16,6 @@ private:
   void ShowUsers();
 
 public:
-  Administrator(std::string name, std::string password, Bank *bank);
-  void Menu() override;
+  Administrator(std::string name, std::string socialSecurityNumber, std::string password, Bank *bank);
+  bool Menu() override;
 };
