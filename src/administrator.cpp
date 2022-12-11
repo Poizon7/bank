@@ -9,6 +9,81 @@
 #include <vector>
 #include <cstdlib>
 
+int stringTointeger(std::string str)
+{
+    int temp = 0;
+    for (int i = 0; i < str.length(); i++) {
+        temp = temp * 10 + (str[i] - '0');
+    }
+    return temp;
+}
+
+// Check if string contains a number
+bool ValidName(std::string word){
+  char numbers[10] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+
+  // Loops throgh all the characters of the word
+  for(char c : word){
+    // Lppos through all the numbers
+    for(char n : numbers){
+      // If the character is a number return true
+      if(c == n){
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
+  // Check if the social security number has the correct length
+  if (socialSecurityNumber.length() != 10 && socialSecurityNumber.length() != 12){
+    return false;
+  }
+
+  int index = 0;
+
+  std::string temp = "";
+  // Loop through the chars in the year of the social security number and adds them to a temporary string
+  while(index < socialSecurityNumber.length() - 8){
+    temp += socialSecurityNumber[index];
+    index++;
+  }
+
+  // Convert the year to an int
+  int year = stringTointeger(temp);
+
+  // Set the temp to the characters of the month then move the index to days
+  temp = socialSecurityNumber[index] + socialSecurityNumber[index + 1];
+  index += 2;
+
+  // Convert the mounth to an int
+  int month = stringTointeger(temp);
+
+  // Set the temp to the characters of the day
+  temp = socialSecurityNumber[index] + socialSecurityNumber[index + 1];
+
+  // Convert the day to an int
+  int day = stringTointeger(temp);
+
+  // Check if the year has passed
+  if(year > 2022){
+    return false;
+  }
+
+  // Check if the month is vaild
+  if(month < 1 || month > 12){
+    return false;
+  }
+
+  // Check if the day is valid
+  if(((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) || ((month == 1 || month == 3 || month == 7 || month == 8 || month == 10 || month == 12) && day > 31) || (month == 2 && day > 28) || day < 1){
+    return false;
+  }
+
+  return true;
+}
+
 // Constructor
 Administrator::Administrator(std::string name, std::string socialSecurityNumber, std::string password, Bank *bank):User(name, socialSecurityNumber, password){
   this->bank = bank;
@@ -50,6 +125,7 @@ bool Administrator::Menu(){
         return false; // Exit the program
       default:
         std::cout << "Invalind choice" << std::endl;
+        break;
     }
   }
 }
@@ -61,11 +137,31 @@ void Administrator::CreateUser(){
   std::string socialSecurityNumber;
   std::string password;
 
-  std::cout << "Enter name: " << std::endl;
-  std::cin >> name;
+  // Loop while the entered name is invalid
+  while(true){
+    std::cout << "Enter name: " << std::endl;
+    std::cin >> name;
 
-  std::cout << "Enter social security number: " << std::endl;
-  std::cin >> socialSecurityNumber;
+    if(ValidName(name)){
+      break;
+    }
+    else{
+      std::cout << "Invalid name" << std::endl;
+    }
+  }
+
+  // Loop while the entered social security number is invalid
+  while(true){
+    std::cout << "Enter social security number: " << std::endl;
+    std::cin >> socialSecurityNumber;
+
+    if(ValidSocialSecurityNumber(socialSecurityNumber)){
+      break;
+    }
+    else {
+      std::cout << "Invalid social security number" << std::endl;
+    }
+  }
 
   std::cout << "Enter password: " << std::endl;
   std::cin >> password;
@@ -100,12 +196,17 @@ void Administrator::CreateAccount(){
 
   // Runs apropriate code based on the type of account that's being created
   switch (choice) {
-    case 1:
+    case 1: {
       int intrest = 0;
       std::cout << "Enter current intrest rate: " << std::endl;
       std::cin >> intrest;
       bank->AddAccount(new TransactionAccount(accountNumber, clearingNumber, intrest));
       break;
+    }
+    default: {
+      std::cout << "Invalind choice" << std::endl;
+      break;
+    }
   }
 
   std::string input = "";

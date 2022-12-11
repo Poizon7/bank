@@ -20,3 +20,15 @@ bool User::CheckPassword(std::string password){
     return false;
   }
 }
+
+bool ContainsNumber(std::string word){
+  char numbers[10] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+  for(char c : word){
+    for(char n : numbers){
+      if(c == n){
+        return true;
+      }
+    }
+  }
+  return false;
+}

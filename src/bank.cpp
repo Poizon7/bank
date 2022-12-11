@@ -15,13 +15,13 @@ Bank::Bank(std::string name){
 void Bank::Login() {
   bool run = true;
 
-  std::string name;
+  std::string socialSecurityNumber;
   std::string password;
 
   // Loop that runs while the program is active
   while (run) {
-    std::cout << "Enter name: " << std::endl;
-    std::cin >> name;
+    std::cout << "Enter social security number: " << std::endl;
+    std::cin >> socialSecurityNumber;
 
     std::cout << "Enter password: " << std::endl;
     std::cin >> password;
@@ -29,7 +29,7 @@ void Bank::Login() {
     // Loops through all users and checks if the supplied name and password match a user
     for (long unsigned int i = 0; i < users.size(); i++) {
       // If name and password match then give the user access to their account
-      if (users[i]->GetName() == name && users[i]->CheckPassword(password)){
+      if (users[i]->GetSocialSecurityNumber() == socialSecurityNumber && users[i]->CheckPassword(password)){
         run = users[i]->Menu();
         break;
       }
