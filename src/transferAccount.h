@@ -9,5 +9,5 @@ public:
   TransactionAccount(std::string accountNumber, std::string clearingNumber, float intrest);
 
   // Setters and getters
-  void ModifyBalance(float change);
+  void ModifyBalance(float change) override;
 };
