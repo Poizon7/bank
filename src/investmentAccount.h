@@ -11,6 +11,6 @@ private:
 
 public:
   InvenstmentAccount(std::string accountNumber, std::string cleringNumber, float tax);
-  virtual void ModifyBalance(float change);
-  virtual void ModifyStocks();
+  virtual void ModifyBalance(float change) = 0;
+  virtual void ModifyStocks() = 0;
 };

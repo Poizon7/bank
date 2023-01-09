@@ -67,17 +67,17 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
   int day = stringTointeger(temp);
 
   // Check if the year has passed
-  if(year > 2022){
+  if(year >= 2022){
     return false;
   }
 
   // Check if the month is vaild
-  if(month < 1 || month > 12){
+  if(month <= 1 || month >= 12){
     return false;
   }
 
   // Check if the day is valid
-  if(((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) || ((month == 1 || month == 3 || month == 7 || month == 8 || month == 10 || month == 12) && day > 31) || (month == 2 && day > 28) || day < 1){
+  if(((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) || ((month == 1 || month == 3 || month == 7 || month == 8 || month == 10 || month == 12) && day > 31) || (month == 2 && day > 29) || day < 1){
     return false;
   }
 
@@ -95,6 +95,7 @@ bool Administrator::Menu(){
   while (true) {
     int choice = 0;
 
+    std::cout << std::endl;
     std::cout << "Menu" << std::endl;
     std::cout << "1: Create user" << std::endl;
     std::cout << "2: Show users" << std::endl;
@@ -104,6 +105,8 @@ bool Administrator::Menu(){
     std::cout << "0: Exit" << std::endl;
 
     std::cin >> choice;
+
+    system("clear"); // ADD platform agnotic
     
     // Call the apropriate function based on the input from the user
     switch (choice) {
@@ -137,19 +140,6 @@ void Administrator::CreateUser(){
   std::string socialSecurityNumber;
   std::string password;
 
-  // Loop while the entered name is invalid
-  while(true){
-    std::cout << "Enter name: " << std::endl;
-    std::cin >> name;
-
-    if(ValidName(name)){
-      break;
-    }
-    else{
-      std::cout << "Invalid name" << std::endl;
-    }
-  }
-
   // Loop while the entered social security number is invalid
   while(true){
     std::cout << "Enter social security number: " << std::endl;
@@ -160,6 +150,19 @@ void Administrator::CreateUser(){
     }
     else {
       std::cout << "Invalid social security number" << std::endl;
+    }
+  }
+  
+  // Loop while the entered name is invalid
+  while(true){
+    std::cout << "Enter name: " << std::endl;
+    std::cin >> name;
+
+    if(ValidName(name)){
+      break;
+    }
+    else{
+      std::cout << "Invalid name" << std::endl;
     }
   }
 
@@ -199,7 +202,7 @@ void Administrator::CreateAccount(){
     case 1: {
       int intrest = 0;
       std::cout << "Enter current intrest rate: " << std::endl;
-      std::cin >> intrest;
+      std::cin >> intrest; // ADD centralized intrest
       bank->AddAccount(new TransactionAccount(accountNumber, clearingNumber, intrest));
       break;
     }

@@ -34,7 +34,9 @@ void Bank::Login() {
         break;
       }
     }
-    std::cout << "Incorrect username or password" << std::endl;
+    if (run) {
+      std::cout << "Incorrect username or password" << std::endl;
+    }
   }
 }
 
