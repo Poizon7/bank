@@ -18,6 +18,8 @@ void Bank::Login() {
   std::string socialSecurityNumber;
   std::string password;
 
+  system("clear");
+
   // Loop that runs while the program is active
   while (run) {
     std::cout << "Enter social security number: " << std::endl;
@@ -26,16 +28,22 @@ void Bank::Login() {
     std::cout << "Enter password: " << std::endl;
     std::cin >> password;
 
+    system("clear");
+    User* user = nullptr;
+
     // Loops through all users and checks if the supplied name and password match a user
     for (long unsigned int i = 0; i < users.size(); i++) {
       // If name and password match then give the user access to their account
       if (users[i]->GetSocialSecurityNumber() == socialSecurityNumber && users[i]->CheckPassword(password)){
-        run = users[i]->Menu();
+        user = users[i];
         break;
       }
     }
-    if (run) {
+
+    if (user == nullptr) {
       std::cout << "Incorrect username or password" << std::endl;
+    } else {
+      run = user->Menu();
     }
   }
 }

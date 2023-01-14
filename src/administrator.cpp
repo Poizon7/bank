@@ -54,14 +54,21 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
   int year = stringTointeger(temp);
 
   // Set the temp to the characters of the month then move the index to days
-  temp = socialSecurityNumber[index] + socialSecurityNumber[index + 1];
-  index += 2;
+  temp = "";
+  temp += socialSecurityNumber[index];
+  index++;
+  temp += socialSecurityNumber[index];
+  index++;
 
   // Convert the mounth to an int
   int month = stringTointeger(temp);
 
   // Set the temp to the characters of the day
-  temp = socialSecurityNumber[index] + socialSecurityNumber[index + 1];
+  temp = "";
+  temp += socialSecurityNumber[index];
+  index++;
+  temp += socialSecurityNumber[index];
+  index++;
 
   // Convert the day to an int
   int day = stringTointeger(temp);
@@ -140,39 +147,62 @@ void Administrator::CreateUser(){
   std::string socialSecurityNumber;
   std::string password;
 
+  bool admin = false;
+
+  std::string input;
+  std::cout << "Are you createing an admin? (y/n)" << std::endl;
+  std::cin >> input;
+
+  if (input == "y") {
+    admin = true;
+  }
+
   // Loop while the entered social security number is invalid
-  while(true){
-    std::cout << "Enter social security number: " << std::endl;
+  if (admin) {
+    std::cout << "Enter username: " << std::endl;
     std::cin >> socialSecurityNumber;
 
-    if(ValidSocialSecurityNumber(socialSecurityNumber)){
-      break;
-    }
-    else {
-      std::cout << "Invalid social security number" << std::endl;
-    }
-  }
-  
-  // Loop while the entered name is invalid
-  while(true){
-    std::cout << "Enter name: " << std::endl;
-    std::cin >> name;
+    name = socialSecurityNumber;
+  } else {
+    while(true){
+      std::cout << "Enter social security number: " << std::endl;
+      std::cin >> socialSecurityNumber;
 
-    if(ValidName(name)){
-      break;
+      if(ValidSocialSecurityNumber(socialSecurityNumber)){
+        break;
+      }
+      else {
+        std::cout << "Invalid social security number" << std::endl;
+      }
     }
-    else{
-      std::cout << "Invalid name" << std::endl;
+    
+    // Loop while the entered name is invalid
+    while(true){
+      std::cout << "Enter name: " << std::endl;
+      std::cin >> name;
+
+      if(ValidName(name)){
+        break;
+      }
+      else{
+        std::cout << "Invalid name" << std::endl;
+      }
     }
   }
 
   std::cout << "Enter password: " << std::endl;
   std::cin >> password;
 
-  PrivateUser* customer = new PrivateUser(name, socialSecurityNumber, password);
-  User* user = customer;
+  if (admin) {
+    Administrator* administrator = new Administrator(name, socialSecurityNumber, password, bank);
+    
+    bank->AddUser(administrator, nullptr);
+  } else {
+    PrivateUser* customer = new PrivateUser(name, socialSecurityNumber, password);
+    User* user = customer;
 
-  bank->AddUser(user, customer);
+    bank->AddUser(user, customer);
+  }
 }
 
 // Shows all users in the bank
@@ -200,7 +230,7 @@ void Administrator::CreateAccount(){
   // Runs apropriate code based on the type of account that's being created
   switch (choice) {
     case 1: {
-      int intrest = 0;
+      float intrest = 0;
       std::cout << "Enter current intrest rate: " << std::endl;
       std::cin >> intrest; // ADD centralized intrest
       bank->AddAccount(new TransactionAccount(accountNumber, clearingNumber, intrest));
@@ -214,7 +244,7 @@ void Administrator::CreateAccount(){
 
   std::string input = "";
 
-  std::cout << "Do you wish to link the account: " << std::endl;
+  std::cout << "Do you wish to link the account? (y/n) " << std::endl;
 
   std::cin >> input;
 
