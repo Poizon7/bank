@@ -1,6 +1,7 @@
 #include "administrator.h"
 #include "bank.h"
 #include "privateUser.h"
+#include "savingsAccount.h"
 #include "transferAccount.h"
 #include "user.h"
 
@@ -92,7 +93,7 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
 }
 
 // Constructor
-Administrator::Administrator(std::string name, std::string socialSecurityNumber, std::string password, Bank *bank):User(name, socialSecurityNumber, password){
+Administrator::Administrator(std::string name, std::string socialSecurityNumber, std::string password, Bank *bank):User(name, socialSecurityNumber, password, bank){
   this->bank = bank;
 }
 
@@ -108,6 +109,7 @@ bool Administrator::Menu(){
     std::cout << "2: Show users" << std::endl;
     std::cout << "3: Create account" << std::endl;
     std::cout << "4: Link account" << std::endl;
+    std::cout << "5: Deposit money" << std::endl;
     std::cout << "9: Logout" << std::endl;
     std::cout << "0: Exit" << std::endl;
 
@@ -128,6 +130,9 @@ bool Administrator::Menu(){
         break;
       case 4:
         LinkAccount(); // Link an account to a user
+        break;
+      case 5:
+        DepositNumber();
         break;
       case 9:
         return true; // Logout but dont exit the program
@@ -198,7 +203,7 @@ void Administrator::CreateUser(){
     
     bank->AddUser(administrator, nullptr);
   } else {
-    PrivateUser* customer = new PrivateUser(name, socialSecurityNumber, password);
+    PrivateUser* customer = new PrivateUser(name, socialSecurityNumber, password, bank);
     User* user = customer;
 
     bank->AddUser(user, customer);
@@ -224,6 +229,8 @@ void Administrator::CreateAccount(){
   int choice = 0;
 
   std::cout << "1: Transaction account" << std::endl;
+  std::cout << "2: Savings account" << std::endl;
+  std::cout << "3: Investment account" << std::endl;
 
   std::cin >> choice;
 
@@ -234,6 +241,18 @@ void Administrator::CreateAccount(){
       std::cout << "Enter current intrest rate: " << std::endl;
       std::cin >> intrest; // ADD centralized intrest
       bank->AddAccount(new TransactionAccount(accountNumber, clearingNumber, intrest));
+      break;
+    }
+    case 2: {
+      float intrest = 0;
+      std::cout << "Enter current intrest rate: " << std::endl;
+      std::cin >> intrest;
+
+      float maxWithdrawl;
+      std::cout << "Enter maximum withdrawl amount: " << std::endl;
+      std::cin >> maxWithdrawl;
+
+      bank->AddAccount(new SavingsAccount(accountNumber, clearingNumber, intrest, maxWithdrawl));
       break;
     }
     default: {
@@ -287,6 +306,26 @@ void Administrator::LinkAccount(){
   for (long unsigned int i = 0; i < accounts.size(); i++){
     if (accounts[i]->GetAccountNumber() == accountNumber) {
       customer->AddAccount(accounts[i]);
+    }
+  }
+}
+
+void Administrator::DepositNumber() {
+  std::string accountNumber;
+  float amount;
+
+  std::cout << "Enter account number: " << std::endl;
+  std::cin >> accountNumber;
+
+  std::cout << "Enter amount: " << std::endl;
+  std::cin >> amount;
+
+  std::vector<Account*> accounts = bank->GetAccounts();
+
+  for (long unsigned int i = 0; i < accounts.size(); i++){
+    if (accounts[i]->GetAccountNumber() == accountNumber) {
+      accounts[i]->ModifyBalance(amount);
+      break;
     }
   }
 }

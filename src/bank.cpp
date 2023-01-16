@@ -57,3 +57,16 @@ void Bank::AddUser(User *user, PrivateUser* customer){
     customers.push_back(customer);
   }
 }
+
+bool Bank::SendMoney(std::string accountNumber, float amount) {
+  if (amount < 0) {return false;}
+
+  for (int i = 0; i < accounts.size(); i++) {
+    if (accounts[i]->GetAccountNumber() == accountNumber) {
+      accounts[i]->ModifyBalance(amount);
+      return true;
+    }
+  }
+
+  return false;
+}

@@ -20,6 +20,7 @@ public:
 
   // Function run from main to interact with the bank
   void Login();
+  bool SendMoney(std::string accountNumber, float amount);
 
   // Seters and geters
   void AddUser(User* user, PrivateUser* customer); 
