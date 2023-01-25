@@ -1,15 +1,62 @@
+#include <sstream>
 #include <string>
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 #include "administrator.h"
 #include "bank.h"
 #include "privateUser.h"
+#include "stock.h"
 
 // Basic constructor that sets the banks name
 Bank::Bank(std::string name){
   this->name = name;
   users.push_back(new Administrator("root", "root", "root", this)); // Add an admin to the bank
+
+  std::ifstream fin;
+  std::string line;
+  fin.open("stocks");
+
+  // Loop for each stock in the file
+  while (std::getline(fin, line)) {
+    std::vector<std::string> variables;
+    std::string variable;
+
+    std::istringstream iss(line);
+
+    // Loop for each cvs
+    while (std::getline(iss, variable, ',')) {
+      variables.push_back(variable);
+    }
+
+    Stock* stock = new Stock(variables[0], std::stof(variables[1]), std::stof(variables[2]));
+  }
+
+  fin.close();
+}
+
+Bank::~Bank(){
+  std::ofstream fout;
+
+  fout.open("stocks");
+
+  for (int i = 0; i < stocks.size(); i++) {
+    fout << stocks[i]->GetName() << "," << stocks[i]->GetNumberOfStocks() << "," << stocks[i] << "\n";
+    delete stocks[i];
+  }
+
+  fout.close();
+}
+
+void Bank::Close() {
+  for (int i = 0; i < accounts.size(); i++) {
+    delete accounts[i];
+  }
+
+  for (int i = 0; i < users.size(); i++) {
+    delete users[i];
+  }
 }
 
 void Bank::Login() {

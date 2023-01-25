@@ -3,4 +3,5 @@
 int main(){
   Bank bank = Bank("Swedbank");
   bank.Login();
+  bank.Close();
 }

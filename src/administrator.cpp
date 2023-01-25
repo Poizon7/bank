@@ -1,7 +1,9 @@
 #include "administrator.h"
 #include "bank.h"
+#include "investmentAccount.h"
 #include "privateUser.h"
 #include "savingsAccount.h"
+#include "stock.h"
 #include "transferAccount.h"
 #include "user.h"
 
@@ -75,12 +77,12 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
   int day = stringTointeger(temp);
 
   // Check if the year has passed
-  if(year >= 2022){
+  if(year > 2022){
     return false;
   }
 
   // Check if the month is vaild
-  if(month <= 1 || month >= 12){
+  if(month < 1 || month > 12){
     return false;
   }
 
@@ -132,7 +134,7 @@ bool Administrator::Menu(){
         LinkAccount(); // Link an account to a user
         break;
       case 5:
-        DepositNumber();
+        DepositMoney();
         break;
       case 9:
         return true; // Logout but dont exit the program
@@ -255,6 +257,14 @@ void Administrator::CreateAccount(){
       bank->AddAccount(new SavingsAccount(accountNumber, clearingNumber, intrest, maxWithdrawl));
       break;
     }
+    case 3: {
+      float tax;
+      std::cout << "Enter current tax (as decimal): " << std::endl;
+      std::cin >> tax;
+
+      bank->AddAccount(new InvestmentAccount(accountNumber, clearingNumber, tax));
+      break;
+    }
     default: {
       std::cout << "Invalind choice" << std::endl;
       break;
@@ -310,7 +320,7 @@ void Administrator::LinkAccount(){
   }
 }
 
-void Administrator::DepositNumber() {
+void Administrator::DepositMoney() {
   std::string accountNumber;
   float amount;
 
@@ -328,4 +338,21 @@ void Administrator::DepositNumber() {
       break;
     }
   }
+}
+
+void Administrator::AddStock() {
+  std::string name;
+  std::string numberOfStocks;
+  std::string price;
+
+  std::cout << "What is the name: " << std::endl;
+  std::cin >> name;
+
+  std::cout << "How many stocks are on sale: " << std::endl;
+  std::cin >> numberOfStocks;
+
+  std::cout << "What is the price per stock: " << std::endl;
+  std::cin >> price;
+
+  bank->AddStock(new Stock(name, std::stof(numberOfStocks), std::stof(price)));
 }
