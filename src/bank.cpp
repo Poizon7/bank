@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -14,51 +16,68 @@ Bank::Bank(std::string name){
   this->name = name;
   users.push_back(new Administrator("root", "root", "root", this)); // Add an admin to the bank
 
-  std::ifstream fin;
-  std::string line;
-  fin.open("stocks");
 
-  // Loop for each stock in the file
-  while (std::getline(fin, line)) {
-    std::vector<std::string> variables;
-    std::string variable;
+  try {
+    std::ifstream fin("stocks.txt");
 
-    std::istringstream iss(line);
+    // Loop for each stock in the file
+    for (std::string line; std::getline(fin, line); ) {
+      std::vector<std::string> variables;
+      std::string variable;
 
-    // Loop for each cvs
-    while (std::getline(iss, variable, ',')) {
-      variables.push_back(variable);
+      std::istringstream iss(line);
+
+      // Loop for each cvs
+      while (std::getline(iss, variable, ',')) {
+        variables.push_back(variable);
+      }
+
+      try {
+        AddStock(new Stock(variables[0], std::stof(variables[1]), std::stof(variables[2])));
+      }
+      catch (std::invalid_argument e) {
+        std::cerr << "stock file contains invalid stocks" << std::endl;
+      }
     }
 
-    Stock* stock = new Stock(variables[0], std::stof(variables[1]), std::stof(variables[2]));
+    fin.close();
   }
-
-  fin.close();
+  catch (std::ifstream::failure e) {
+    std::cerr << "Exception opening/reading/closing the stock file" << std::endl;
+  }
 }
 
-Bank::~Bank(){
+// Record the stock to the file and clear memory
+void Bank::Close() {
   std::ofstream fout;
 
-  fout.open("stocks");
+  try {
+    fout.open("stocks.txt");
 
-  for (int i = 0; i < stocks.size(); i++) {
-    fout << stocks[i]->GetName() << "," << stocks[i]->GetNumberOfStocks() << "," << stocks[i] << "\n";
-    delete stocks[i];
+    // Loop through all the stocks, write them to the file and then release the memory
+    for (int i = 0; i < stocks.size(); i++) {
+      fout << stocks[i]->GetName() << "," << stocks[i]->GetNumberOfStocks() << "," << stocks[i]->GetPrice() << "\n";
+      delete stocks[i];
+    }
+
+    fout.close();
+  }
+  catch (std::ifstream::failure e) {
+    std::cerr << "Exceprion opening/reading/closing the stock file" << std::endl;
   }
 
-  fout.close();
-}
-
-void Bank::Close() {
+  // Release the memory for all the accounts
   for (int i = 0; i < accounts.size(); i++) {
     delete accounts[i];
   }
 
+  // Realease the memory for all the users
   for (int i = 0; i < users.size(); i++) {
     delete users[i];
   }
 }
 
+// The main way of interacting with the bank
 void Bank::Login() {
   bool run = true;
 
@@ -75,7 +94,7 @@ void Bank::Login() {
     std::cout << "Enter password: " << std::endl;
     std::cin >> password;
 
-    system("clear");
+    // system("clear");
     User* user = nullptr;
 
     // Loops through all users and checks if the supplied name and password match a user
@@ -88,7 +107,7 @@ void Bank::Login() {
     }
 
     if (user == nullptr) {
-      std::cout << "Incorrect username or password" << std::endl;
+      std::cerr << "Incorrect username or password" << std::endl;
     } else {
       run = user->Menu();
     }
@@ -105,15 +124,21 @@ void Bank::AddUser(User *user, PrivateUser* customer){
   }
 }
 
-bool Bank::SendMoney(std::string accountNumber, float amount) {
-  if (amount < 0) {return false;}
+// Send money to a different account in the bank
+void Bank::SendMoney(std::string accountNumber, float amount) {
+  if (amount < 0) {throw std::invalid_argument("Cannot send less then 0");}
+
+  bool success = false;
 
   for (int i = 0; i < accounts.size(); i++) {
     if (accounts[i]->GetAccountNumber() == accountNumber) {
       accounts[i]->ModifyBalance(amount);
-      return true;
+      success = true;
+      break;
     }
   }
 
-  return false;
+  if (!success) {
+    throw std::invalid_argument("Account does not exist");
+  }
 }

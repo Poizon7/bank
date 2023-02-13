@@ -10,8 +10,9 @@ private:
   void CreateAccount(); // Creates an account and adds it to the list in the bank
   void LinkAccount(); // Adds an account to a users list of accounts
   void ShowUsers(); // Displays a list of all users in the bank
-  void DepositMoney();
-  void AddStock();
+  void DepositMoney(); // Add money to an account
+  void AddStock(); // Add a new stock to the account
+  void ShowStocks(); // Displays a list of all stocks
 
 public:
   // Constructor that creates an admin user (only difference from a normal user is the bank*)

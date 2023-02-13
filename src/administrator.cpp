@@ -7,41 +7,35 @@
 #include "transferAccount.h"
 #include "user.h"
 
+#include <ios>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <cstdlib>
-
-int stringTointeger(std::string str)
-{
-    int temp = 0;
-    for (int i = 0; i < str.length(); i++) {
-        temp = temp * 10 + (str[i] - '0');
-    }
-    return temp;
-}
+#include <limits>
 
 // Check if string contains a number
-bool ValidName(std::string word){
+void ValidName(std::string word){
   char numbers[10] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
   // Loops throgh all the characters of the word
   for(char c : word){
-    // Lppos through all the numbers
+    // Loops through all the numbers
     for(char n : numbers){
       // If the character is a number return true
       if(c == n){
-        return false;
+        throw std::invalid_argument("Name contains numbers");
       }
     }
   }
-  return true;
 }
 
-bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
+// Check if the social security number is vaild
+void ValidSocialSecurityNumber(std::string socialSecurityNumber){
   // Check if the social security number has the correct length
   if (socialSecurityNumber.length() != 10 && socialSecurityNumber.length() != 12){
-    return false;
+    throw std::invalid_argument("Social security number is of invalid length");
   }
 
   int index = 0;
@@ -53,8 +47,15 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
     index++;
   }
 
+  int year;
+
   // Convert the year to an int
-  int year = stringTointeger(temp);
+  try {
+    year = stoi(temp);
+  }
+  catch (std::invalid_argument e) {
+    throw std::invalid_argument("Social security number contains non number");
+  }
 
   // Set the temp to the characters of the month then move the index to days
   temp = "";
@@ -63,8 +64,15 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
   temp += socialSecurityNumber[index];
   index++;
 
+  int month;
+
   // Convert the mounth to an int
-  int month = stringTointeger(temp);
+  try {
+    month = stoi(temp);
+  }
+  catch (std::invalid_argument e) {
+    throw std::invalid_argument("Social security number contains non number");
+  }
 
   // Set the temp to the characters of the day
   temp = "";
@@ -73,25 +81,30 @@ bool ValidSocialSecurityNumber(std::string socialSecurityNumber){
   temp += socialSecurityNumber[index];
   index++;
 
+  int day;
+
   // Convert the day to an int
-  int day = stringTointeger(temp);
+  try {
+    day = stoi(temp);
+  }
+  catch (std::invalid_argument e) {
+    throw std::invalid_argument("Social security number contains non number");
+  }
 
   // Check if the year has passed
   if(year > 2022){
-    return false;
+    throw std::invalid_argument("Social security number contains invalid year");
   }
 
   // Check if the month is vaild
   if(month < 1 || month > 12){
-    return false;
+    throw std::invalid_argument("Social security number contains invalid month");
   }
 
   // Check if the day is valid
   if(((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) || ((month == 1 || month == 3 || month == 7 || month == 8 || month == 10 || month == 12) && day > 31) || (month == 2 && day > 29) || day < 1){
-    return false;
+    throw std::invalid_argument("Social security number contains invalid day");
   }
-
-  return true;
 }
 
 // Constructor
@@ -112,6 +125,7 @@ bool Administrator::Menu(){
     std::cout << "3: Create account" << std::endl;
     std::cout << "4: Link account" << std::endl;
     std::cout << "5: Deposit money" << std::endl;
+    std::cout << "6: Show stocks" << std::endl;
     std::cout << "9: Logout" << std::endl;
     std::cout << "0: Exit" << std::endl;
 
@@ -134,52 +148,69 @@ bool Administrator::Menu(){
         LinkAccount(); // Link an account to a user
         break;
       case 5:
-        DepositMoney();
+        DepositMoney(); // Deposit money into account
+        break;
+      case 6:
+        ShowStocks();
         break;
       case 9:
         return true; // Logout but dont exit the program
       case 0:
         return false; // Exit the program
       default:
-        std::cout << "Invalind choice" << std::endl;
+        std::cerr << "Invalind choice" << std::endl;
         break;
     }
   }
 }
 
 // Create a new user in the bank
-// ADD ability to add admin
 void Administrator::CreateUser(){
   std::string name;
   std::string socialSecurityNumber;
   std::string password;
 
-  bool admin = false;
+  bool admin;
 
-  std::string input;
-  std::cout << "Are you createing an admin? (y/n)" << std::endl;
-  std::cin >> input;
+  // Loop until the user has chosen if they are going to create an admin
+  while (true) {
+    std::string input;
+    std::cout << "Are you createing an admin? (y/n)" << std::endl;
+    std::cin >> input;
 
-  if (input == "y") {
-    admin = true;
+    if (input == "y") {
+      admin = true;
+      break;
+    }
+    else if (input == "n") {
+      admin = false;
+      break;
+    }
+    else {
+      std::cerr << "Inccorect choice" << std::endl;
+    }
   }
 
-  // Loop while the entered social security number is invalid
+  // If the user is an admin use to same value for ssn and name and do not check ssn validity
+  // Else enter ssn and name with checks
   if (admin) {
     std::cout << "Enter username: " << std::endl;
     std::cin >> socialSecurityNumber;
 
     name = socialSecurityNumber;
-  } else {
+  }
+  else {
+    // Loop whiel the entered social security number is invalid
     while(true){
       std::cout << "Enter social security number: " << std::endl;
       std::cin >> socialSecurityNumber;
 
-      if(ValidSocialSecurityNumber(socialSecurityNumber)){
+      try {
+        ValidSocialSecurityNumber(socialSecurityNumber);
         break;
       }
-      else {
-        std::cout << "Invalid social security number" << std::endl;
+      catch (std::invalid_argument e) {
+        std::cerr << e.what() << std::endl;
       }
     }
     
@@ -188,11 +219,12 @@ void Administrator::CreateUser(){
       std::cout << "Enter name: " << std::endl;
       std::cin >> name;
 
-      if(ValidName(name)){
+      try {
+        ValidName(name);
         break;
       }
-      else{
-        std::cout << "Invalid name" << std::endl;
+      catch (std::invalid_argument e) {
+        std::cerr << e.what() << std::endl;
       }
     }
   }
@@ -200,11 +232,14 @@ void Administrator::CreateUser(){
   std::cout << "Enter password: " << std::endl;
   std::cin >> password;
 
+  // If the user is an admin add the user to only the user list
+  // Else add the user to both the user and customer lists
   if (admin) {
     Administrator* administrator = new Administrator(name, socialSecurityNumber, password, bank);
     
     bank->AddUser(administrator, nullptr);
-  } else {
+  }
+  else {
     PrivateUser* customer = new PrivateUser(name, socialSecurityNumber, password, bank);
     User* user = customer;
 
@@ -228,7 +263,7 @@ void Administrator::CreateAccount(){
   std::string accountNumber = std::to_string(rand());
   std::string clearingNumber = std::to_string(rand());
 
-  int choice = 0;
+  int choice;
 
   std::cout << "1: Transaction account" << std::endl;
   std::cout << "2: Savings account" << std::endl;
@@ -239,30 +274,81 @@ void Administrator::CreateAccount(){
   // Runs apropriate code based on the type of account that's being created
   switch (choice) {
     case 1: {
-      float intrest = 0;
-      std::cout << "Enter current intrest rate: " << std::endl;
-      std::cin >> intrest; // ADD centralized intrest
+      float intrest;
+
+      // Loop while the entered intrest rate is invalid
+      while (true) {
+        try {
+          std::cout << "Enter current intrest rate: " << std::endl;
+          std::cin >> intrest;
+          break;
+        }
+        catch (std::ios_base::failure e) {
+          std::cerr << "Invalid number" << std::endl;
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+      }
+
       bank->AddAccount(new TransactionAccount(accountNumber, clearingNumber, intrest));
       break;
     }
     case 2: {
-      float intrest = 0;
-      std::cout << "Enter current intrest rate: " << std::endl;
-      std::cin >> intrest;
-
+      float intrest;
       float maxWithdrawl;
-      std::cout << "Enter maximum withdrawl amount: " << std::endl;
-      std::cin >> maxWithdrawl;
+
+      // Loop while the entered intrest is invalid
+      while (true) {
+        try {
+          std::cout << "Enter current intrest rate: " << std::endl;
+          std::cin >> intrest;
+          break;
+        }
+        catch (std::ios_base::failure e) {
+          std::cerr << "Invalid number" << std::endl;
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+      }
+
+      // Loop while the enterd amount is invalid
+      while (true) {
+        try {
+          std::cout << "Enter maximum withdrawl amount: " << std::endl;
+          std::cin >> maxWithdrawl;
+          break;
+        }
+        catch (std::ios_base::failure e) {
+          std::cerr << "Invalid number" << std::endl;
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+      }
 
       bank->AddAccount(new SavingsAccount(accountNumber, clearingNumber, intrest, maxWithdrawl));
       break;
     }
     case 3: {
       float tax;
-      std::cout << "Enter current tax (as decimal): " << std::endl;
-      std::cin >> tax;
 
-      bank->AddAccount(new InvestmentAccount(accountNumber, clearingNumber, tax));
+      // Loop while the entered tax is invalid
+      while (true) {
+        try {
+          std::cout << "Enter current tax (as decimal): " << std::endl;
+          std::cin >> tax;
+          break;
+        }
+        catch (std::ios_base::failure e) {
+          std::cerr << "Invalid number" << std::endl;
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+      }
+
+      InvestmentAccount *account = new InvestmentAccount(accountNumber, clearingNumber, tax);
+
+      bank->AddAccount(account);
+      bank->AddInvestmentAccount(account);
       break;
     }
     default: {
@@ -271,10 +357,9 @@ void Administrator::CreateAccount(){
     }
   }
 
-  std::string input = "";
+  std::string input;
 
   std::cout << "Do you wish to link the account? (y/n) " << std::endl;
-
   std::cin >> input;
 
   // If the account is to be linked imedietly do so
@@ -288,71 +373,190 @@ void Administrator::CreateAccount(){
 }
 
 // Add an account to a users list of accounts
-void Administrator::LinkAccount(){
+void Administrator::LinkAccount() {
   std::vector<Account*> accounts = bank->GetAccounts();
+  std::vector<InvestmentAccount*> investmentAccounts = bank->GetInvestmentAccounts();
   std::vector<PrivateUser*> customers = bank->GetCustomer();
   
-  std::string socialSecurityNumber = "";
-  std::string accountNumber = "";
-
-  std::cout << "Enter users social security number: " << std::endl;
-
-  std::cin >> socialSecurityNumber;
-
-  std::cout << "Enter account number: " << std::endl;
-
-  std::cin >> accountNumber;
+  std::string socialSecurityNumber;
+  std::string accountNumber;
 
   PrivateUser* customer;
 
-  // Loop through all customers and set the correct one as active
-  for (long unsigned int i = 0; i < customers.size(); i++) {
-    if (customers[i]->GetSocialSecurityNumber() == socialSecurityNumber) {
-      customer = customers[i];
+  // Loop while the ssn does not match a user
+  while (true) {
+    std::cout << "Enter user's social security number: " << std::endl;
+    std::cin >> socialSecurityNumber;
+
+    // Loop through all customers and set the correct one as active
+    for (long unsigned int i = 0; i < customers.size(); i++) {
+      if (customers[i]->GetSocialSecurityNumber() == socialSecurityNumber) {
+        customer = customers[i];
+      }
     }
-  }
 
-  // Loop through all the accounts and add the correct one to the active users list of accounts
-  for (long unsigned int i = 0; i < accounts.size(); i++){
-    if (accounts[i]->GetAccountNumber() == accountNumber) {
-      customer->AddAccount(accounts[i]);
+    if (customer == nullptr) {
+      std::cerr << "Customer does not exist" << std::endl;
     }
-  }
-}
-
-void Administrator::DepositMoney() {
-  std::string accountNumber;
-  float amount;
-
-  std::cout << "Enter account number: " << std::endl;
-  std::cin >> accountNumber;
-
-  std::cout << "Enter amount: " << std::endl;
-  std::cin >> amount;
-
-  std::vector<Account*> accounts = bank->GetAccounts();
-
-  for (long unsigned int i = 0; i < accounts.size(); i++){
-    if (accounts[i]->GetAccountNumber() == accountNumber) {
-      accounts[i]->ModifyBalance(amount);
+    else {
       break;
     }
   }
+
+  bool run = true;
+  bool investment;
+  std::string answer;
+
+  while (true) {
+    std::cout << "Is the account an investmentAccount (y/n): " << std::endl;
+    std::cin >> answer;
+
+    if (answer == "y") {
+      investment = true;
+      break;
+    }
+    else if (answer == "n") {
+      investment = false;
+      break;
+    }
+    else {
+      std::cerr << "Invalid choice" << std::endl;
+    }
+  }
+
+  // Loop while the account number does not match an account
+  while (run) {
+    std::cout << "Enter account number: " << std::endl;
+    std::cin >> accountNumber;
+
+    if (investment) {
+      for (int i = 0; i < investmentAccounts.size(); i++) {
+        if (investmentAccounts[i]->GetAccountNumber() == accountNumber) {
+          customer->AddInvestmentAccount(investmentAccounts[i]);
+          run = false;
+          break;
+        }
+      }
+    }
+
+    // Loop through all the accounts and add the correct one to the active users list of accounts
+    for (long unsigned int i = 0; i < accounts.size(); i++){
+      if (accounts[i]->GetAccountNumber() == accountNumber) {
+        customer->AddAccount(accounts[i]);
+        run = false;
+        break;
+      }
+    }
+
+    if (!run) {
+      break;
+    }
+    else {
+      std::cerr << "Account does not exist" << std::endl;
+    }
+  }
 }
 
+// Add money to an account
+void Administrator::DepositMoney() {
+  Account* account;
+  float amount;
+
+  // Loop while the entered amount is invalid
+  while (true) {
+    std::string accountNumber;
+    std::cout << "Enter account number: " << std::endl;
+    std::cin >> accountNumber;
+
+    std::vector<Account*> accounts = bank->GetAccounts();
+
+    // Loop through all the accounts in the bank
+    for (long unsigned int i = 0; i < accounts.size(); i++){
+      if (accounts[i]->GetAccountNumber() == accountNumber) {
+        account = accounts[i];
+        break;
+      }
+    }
+
+    if (account == nullptr) {
+      std::cerr << "The account does not exist" << std::endl;
+    }
+    else {
+      break;
+    }
+  }
+
+  // Loop while the amount is invalid
+  while (true) {
+    try {
+      std::cout << "Enter amount: " << std::endl;
+      std::cin >> amount;
+      break;
+    }
+    catch (std::ios_base::failure e) {
+      std::cerr << "Invalid input" << std::endl;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+  }
+
+  account->ModifyBalance(amount);
+}
+
+// Add a new stock to the bank
 void Administrator::AddStock() {
   std::string name;
-  std::string numberOfStocks;
-  std::string price;
+  float numberOfStocks;
+  float price;
 
-  std::cout << "What is the name: " << std::endl;
-  std::cin >> name;
+  // Loop while the entered name is invalid
+  while (true) {
+    try {
+      std::cout << "What is the name: " << std::endl;
+      std::cin >> name;
 
-  std::cout << "How many stocks are on sale: " << std::endl;
-  std::cin >> numberOfStocks;
+      ValidName(name);
+      break;
+    }
+    catch (std::invalid_argument e) {
+      std::cerr << e.what() << std::endl;
+    }
+  }
 
-  std::cout << "What is the price per stock: " << std::endl;
-  std::cin >> price;
+  // Loop while the number of stocks entered is invalid
+  while (true) {
+    try {
+      std::cout << "How many stocks are on sale: " << std::endl;
+      std::cin >> numberOfStocks;
+      break;
+    }
+    catch (std::ios_base::failure e) {
+      std::cerr << "Invalid input" << std::endl;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+  }
 
-  bank->AddStock(new Stock(name, std::stof(numberOfStocks), std::stof(price)));
+  // Loop while the price of the stock is invalid
+  while (true) {
+    try {
+      std::cout << "What is the price per stock: " << std::endl;
+      std::cin >> price;
+      break;
+    }
+    catch (std::ios_base::failure e) {
+      std::cerr << "Invalid input" << std::endl;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+  }
+
+  bank->AddStock(new Stock(name, numberOfStocks, price));
+}
+
+void Administrator::ShowStocks() {
+  std::vector<Stock*> stocks = bank->GetStocks();
+  for (int i = 0; i < stocks.size(); i++) {
+    std::cout << stocks[i]->GetName() << std::endl;
+  }
 }

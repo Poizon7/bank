@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 
 #include "savingsAccount.h"
 #include "bankAccount.h"
@@ -14,7 +15,7 @@ void SavingsAccount::ModifyBalance(float change){
       currentWithdrawl += change * -1;
     }
     else {
-      std::cout << "You have exeded your monthly withdrawl limit" << std::endl;
+      throw std::invalid_argument("You have exeded your monthly withdrawl limit");
     }
   }
   else {

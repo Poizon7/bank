@@ -1,19 +1,24 @@
 #pragma once
 
+class InvestmentAccount;
+class Bank;
+
+#include "investmentAccount.h"
 #include "user.h"
 #include "account.h"
 #include <string>
 #include <vector>
 
-class Bank;
-
 class PrivateUser : public User {
 private:
   std::vector<Account*> accounts; // List of all the users accounts
+  std::vector<InvestmentAccount*> investmentAccounts;
 
 private:
   void ShowAccounts(); // Show all the users accounts
   void SendMoney();
+  void TradeStocks();
+  void ShowStocks();
 
 public:
   // Constructors
@@ -24,4 +29,5 @@ public:
 
   // Setter and getter
   void AddAccount(Account *account){accounts.push_back(account);}
+  void AddInvestmentAccount(InvestmentAccount *investmentAccount){investmentAccounts.push_back(investmentAccount);}
 };
